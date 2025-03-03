@@ -172,10 +172,7 @@ jobs:
           echo "TEMP_DIR=$TEMP_DIR" >> $GITHUB_ENV
           mkdir -p $TEMP_DIR
           mkdir -p $TEMP_DIR/build/
-          mkdir -p $TEMP_DIR/src/cloud
-          mkdir -p $TEMP_DIR/src/ot
-          mkdir -p $TEMP_DIR/src/secops
-          mkdir -p $TEMP_DIR/src/sase
+          mkdir -p $TEMP_DIR/src/references
           chmod -R 777 $TEMP_DIR
 
       - name: Clone Theme
@@ -196,33 +193,9 @@ jobs:
       - name: Clone cloud
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
         with:
-          repository: ${{ github.repository_owner }}/cloud
+          repository: ${{ github.repository_owner }}/references
           token: ${{ secrets.PAT }} 
-          path: ${{ env.TEMP_DIR }}/src/cloud/docs
-          fetch-depth: 0
-
-      - name: Clone ot
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
-        with:
-          repository: ${{ github.repository_owner }}/ot
-          token: ${{ secrets.PAT }} 
-          path: ${{ env.TEMP_DIR }}/src/ot/docs
-          fetch-depth: 0
-
-      - name: Clone secops
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
-        with:
-          repository: ${{ github.repository_owner }}/secops
-          token: ${{ secrets.PAT }} 
-          path: ${{ env.TEMP_DIR }}/src/secops/docs
-          fetch-depth: 0
-
-      - name: Clone sase
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
-        with:
-          repository: ${{ github.repository_owner }}/sase
-          token: ${{ secrets.PAT }} 
-          path: ${{ env.TEMP_DIR }}/src/sase/docs
+          path: ${{ env.TEMP_DIR }}/src/references/docs
           fetch-depth: 0
 
       - name: Build HTML
@@ -233,33 +206,15 @@ jobs:
           docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="Hands on Labs" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -v $TEMP_DIR/src/landing-page:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
           mv $TEMP_DIR/src/landing-page/site $TEMP_DIR/build/
 
-          cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/cloud/docs/
-          mv $TEMP_DIR/src/cloud/docs/theme/partials/tabs-cloud.html $TEMP_DIR/src/cloud/docs/theme/partials/tabs.html
-          echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/cloud/mkdocs.yml"
-          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="Cloud Hands on Labs" -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/cloud/" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" -v $TEMP_DIR/src/cloud:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-          mv $TEMP_DIR/src/cloud/site $TEMP_DIR/build/site/cloud
-
-          cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/ot/docs/
-          mv $TEMP_DIR/src/ot/docs/theme/partials/tabs-ot.html $TEMP_DIR/src/ot/docs/theme/partials/tabs.html
-          echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/ot/mkdocs.yml"
-          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="OT Hands on Labs" -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/ot/" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" -v $TEMP_DIR/src/ot:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-          mv $TEMP_DIR/src/ot/site $TEMP_DIR/build/site/ot
-
-          cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/secops/docs/
-          mv $TEMP_DIR/src/secops/docs/theme/partials/tabs-secops.html $TEMP_DIR/src/secops/docs/theme/partials/tabs.html
-          echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/secops/mkdocs.yml"
-          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="SecOps Hands on Labs" -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/secops/" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" -v $TEMP_DIR/src/secops:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-          mv $TEMP_DIR/src/secops/site $TEMP_DIR/build/site/secops
-
-          cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/sase/docs/
-          mv $TEMP_DIR/src/sase/docs/theme/partials/tabs-sase.html $TEMP_DIR/src/sase/docs/theme/partials/tabs.html
-          echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/sase/mkdocs.yml"
-          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="SASE Hands on Labs" -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/sase/" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" -v $TEMP_DIR/src/sase:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-          mv $TEMP_DIR/src/sase/site $TEMP_DIR/build/site/sase
+          cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/references/docs/
+          mv $TEMP_DIR/src/references/docs/theme/partials/tabs-cloud.html $TEMP_DIR/src/references/docs/theme/partials/tabs.html
+          echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/references/mkdocs.yml"
+          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="References" -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/cloud/" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" -v $TEMP_DIR/src/cloud:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
+          mv $TEMP_DIR/src/references/site $TEMP_DIR/build/site/references
 
       - name: Create PDF
         run: |
-          TARGET_DIRS=("cloud" "ot" "secops" "sase")
+          TARGET_DIRS=("references")
           for target in "${TARGET_DIRS[@]}"; do
             TARGET_DIR="$TEMP_DIR/src/${target}/docs/"
             find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d ! -name ".vscode" ! -name "theme" ! -name ".git" ! -name ".github" ! -name "images" | while read -r folder; do
