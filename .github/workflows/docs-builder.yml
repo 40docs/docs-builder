@@ -206,7 +206,7 @@ jobs:
           cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/references/docs/
           mv $TEMP_DIR/src/references/docs/theme/partials/tabs-references.html $TEMP_DIR/src/references/docs/theme/partials/tabs.html
           echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/references/mkdocs.yml"
-          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="References" -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/cloud/" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" -v $TEMP_DIR/src/cloud:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
+          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="References" -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/references/" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" -v $TEMP_DIR/src/references:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
           mv $TEMP_DIR/src/references/site $TEMP_DIR/build/site/references
 
       - name: Create PDF
