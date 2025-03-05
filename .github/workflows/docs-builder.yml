@@ -188,12 +188,6 @@ jobs:
           path: ${{ env.TEMP_DIR }}/src/landing-page/docs
           fetch-depth: 0
 
-      - name: Clone references
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
-        with:
-          repository: ${{ github.repository_owner }}/references
-          path: ${{ env.TEMP_DIR }}/src/references/docs
-          fetch-depth: 0
 
       - name: Build HTML
         shell: bash
@@ -202,41 +196,6 @@ jobs:
           echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/landing-page/mkdocs.yml"
           docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="Hands on Labs" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -v $TEMP_DIR/src/landing-page:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
           mv $TEMP_DIR/src/landing-page/site $TEMP_DIR/build/
-
-          cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/references/docs/
-          mv $TEMP_DIR/src/references/docs/theme/partials/tabs-references.html $TEMP_DIR/src/references/docs/theme/partials/tabs.html
-          echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/references/mkdocs.yml"
-          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="References" -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/references/" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" -v $TEMP_DIR/src/references:/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-          mv $TEMP_DIR/src/references/site $TEMP_DIR/build/site/references
-
-      - name: Create PDF
-        run: |
-          TARGET_DIRS=("references")
-          for target in "${TARGET_DIRS[@]}"; do
-            TARGET_DIR="$TEMP_DIR/src/${target}/docs/"
-            find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d ! -name ".vscode" ! -name "theme" ! -name ".git" ! -name ".github" ! -name "images" | while read -r folder; do
-              folder_name=$(basename "$folder")
-              echo $folder
-              echo $folder_name
-              cp -a $TEMP_DIR/src/theme "$TEMP_DIR/src/${target}/docs/${folder_name}/"
-              mv "$TEMP_DIR/src/${target}/docs/${folder_name}/" "$TEMP_DIR/src/${target}/docs/docs"
-              echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/${target}/docs/mkdocs.yml"
-              NORMALIZED_NAME="${folder_name//-/ }"
-              NORMALIZED_NAME=$(echo "$NORMALIZED_NAME" | sed -E 's/\b(.)/\U\1/g')
-              docker run --rm --user $(id -u):$(id -g) \
-                -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
-                -e MKDOCS_PDF_FILENAME="${folder_name}.pdf" \
-                -e MKDOCS_SITE_NAME="${NORMALIZED_NAME}" \
-                -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/${target}/" \
-                -e CUSTOM_DIR="theme" \
-                -e MKDOCS_EXPORTER_PDF_ENABLED="true" \
-                -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" \
-                -v "$TEMP_DIR/src/${target}/docs/:/docs" \
-                ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-              rm -rf "$TEMP_DIR/src/${target}/docs/docs"
-              mv "$TEMP_DIR/src/${target}/docs/site/${folder_name}.pdf" "$TEMP_DIR/build/site/${target}/${folder_name}/"
-            done
-          done
 
       - name: Copy Workdir to TEMP_DIR
         run: |
