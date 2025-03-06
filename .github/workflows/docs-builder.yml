@@ -199,19 +199,38 @@ jobs:
       - name: Generate PDF for Hands-on-Labs
         run: |
           TARGET_DIR="$TEMP_DIR/src/landing-page/docs/hands-on-labs/"
+          PDF_BUILD_DIR="$TEMP_DIR/src/landing-page/docs/hands-on-labs-pdf"
+      
+          # Ensure hands-on-labs exists
           if [ -d "$TARGET_DIR" ]; then
             echo "Generating PDF for Hands-on-Labs from source Markdown files."
+      
+            # Create a temporary directory for the PDF build
+            mkdir -p "$PDF_BUILD_DIR"
+            cp -a "$TARGET_DIR"/* "$PDF_BUILD_DIR/"
+      
+            # Create a temporary mkdocs.yml for the PDF generation
+            echo "site_name: Hands-on Labs" > "$PDF_BUILD_DIR/mkdocs.yml"
+            echo "docs_dir: ." >> "$PDF_BUILD_DIR/mkdocs.yml"
+            echo "theme:" >> "$PDF_BUILD_DIR/mkdocs.yml"
+            echo "  name: null" >> "$PDF_BUILD_DIR/mkdocs.yml"
+            echo "  custom_dir: theme" >> "$PDF_BUILD_DIR/mkdocs.yml"
+            echo "plugins:" >> "$PDF_BUILD_DIR/mkdocs.yml"
+            echo "  - mkdocs-pdf-exporter" >> "$PDF_BUILD_DIR/mkdocs.yml"
+      
+            # Run MkDocs inside Docker to generate the PDF
             docker run --rm --user $(id -u):$(id -g) \
               -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
               -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
               -e MKDOCS_SITE_NAME="Hands-on Labs" \
               -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/hands-on-labs/" \
-              -e CUSTOM_DIR="theme" \
               -e MKDOCS_EXPORTER_PDF_ENABLED="true" \
               -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" \
-              -v "$TARGET_DIR:/docs" \
+              -v "$PDF_BUILD_DIR:/docs" \
               ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-            mv "$TARGET_DIR/site/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
+      
+            # Move the generated PDF to the correct location
+            mv "$PDF_BUILD_DIR/site/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
           else
             echo "ERROR: hands-on-labs source directory not found in $TARGET_DIR!"
             ls -R $TEMP_DIR/src/landing-page/docs/
