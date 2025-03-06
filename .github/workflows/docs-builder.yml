@@ -198,7 +198,7 @@ jobs:
 
       - name: Generate PDF for Hands-on-Labs
         run: |
-          TARGET_DIR="$TEMP_DIR/build/hands-on-labs/"
+          TARGET_DIR="$TEMP_DIR/build/site/hands-on-labs/"
           if [ -d "$TARGET_DIR" ]; then
             echo "Generating PDF for Hands-on-Labs"
             docker run --rm --user $(id -u):$(id -g) \
@@ -214,7 +214,7 @@ jobs:
             mv "$TARGET_DIR/site/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
           else
             echo "ERROR: hands-on-labs directory not found in $TARGET_DIR!"
-            ls -R $TEMP_DIR/build/
+            ls -R $TEMP_DIR/build/site/
             exit 1
           fi
 
