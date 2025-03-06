@@ -198,47 +198,32 @@ jobs:
 
       - name: Create PDF
         run: |
-          TARGET_DIR="$TEMP_DIR/src/landing-page/docs/hands-on-labs/"
-          
-          # Check if hands-on-labs directory exists
-          if [ -d "$TARGET_DIR" ]; then
-            echo "Generating PDF for Hands-on-Labs"
-      
-            # Ensure the target PDF directory structure
-            mkdir -p "$TEMP_DIR/build/site/hands-on-labs/"
-      
-            # Copy the theme directory to hands-on-labs
-            cp -a $TEMP_DIR/src/theme "$TARGET_DIR/"
-      
-            # Move hands-on-labs content into a `docs` subdirectory for MkDocs
-            mv "$TARGET_DIR" "$TEMP_DIR/src/landing-page/docs/docs"
-      
-            # Ensure mkdocs.yml inherits the theme settings
-            echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/landing-page/mkdocs.yml"
-      
-            # Run MkDocs inside Docker to generate the PDF
-            docker run --rm --user $(id -u):$(id -g) \
-              -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
-              -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
-              -e MKDOCS_SITE_NAME="Hands-on Labs" \
-              -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/hands-on-labs/" \
-              -e CUSTOM_DIR="theme" \
-              -e MKDOCS_EXPORTER_PDF_ENABLED="true" \
-              -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" \
-              -v "$TEMP_DIR/src/landing-page/docs/:/docs" \
-              ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-      
-            # Move the generated PDF to the expected build location
-            mv "$TEMP_DIR/src/landing-page/docs/site/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs/"
-            
-            # Cleanup temporary docs directory
-            rm -rf "$TEMP_DIR/src/landing-page/docs/docs"
-      
-            echo "PDF successfully generated and moved!"
-          else
-            echo "ERROR: hands-on-labs directory not found in $TARGET_DIR!"
-            exit 1
-          fi
+          TARGET_DIRS=("landing-page")
+          for target in "${TARGET_DIRS[@]}"; do
+            TARGET_DIR="$TEMP_DIR/src/${target}/docs/"
+            find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d ! -name ".vscode" ! -name "theme" ! -name ".git" ! -name ".github" ! -name "images" | while read -r folder; do
+              folder_name=$(basename "$folder")
+              echo $folder
+              echo $folder_name
+              cp -a $TEMP_DIR/src/theme "$TEMP_DIR/src/${target}/docs/${folder_name}/"
+              mv "$TEMP_DIR/src/${target}/docs/${folder_name}/" "$TEMP_DIR/src/${target}/docs/docs"
+              echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/${target}/docs/mkdocs.yml"
+              NORMALIZED_NAME="${folder_name//-/ }"
+              NORMALIZED_NAME=$(echo "$NORMALIZED_NAME" | sed -E 's/\b(.)/\U\1/g')
+              docker run --rm --user $(id -u):$(id -g) \
+                -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
+                -e MKDOCS_PDF_FILENAME="${folder_name}.pdf" \
+                -e MKDOCS_SITE_NAME="${NORMALIZED_NAME}" \
+                -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}/${target}/" \
+                -e CUSTOM_DIR="theme" \
+                -e MKDOCS_EXPORTER_PDF_ENABLED="true" \
+                -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" \
+                -v "$TEMP_DIR/src/${target}/docs/:/docs" \
+                ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
+              rm -rf "$TEMP_DIR/src/${target}/docs/docs"
+              mv "$TEMP_DIR/src/${target}/docs/site/${folder_name}.pdf" "$TEMP_DIR/build/site/${target}/${folder_name}/"
+            done
+          done
         
 
 
