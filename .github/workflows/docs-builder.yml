@@ -198,9 +198,9 @@ jobs:
 
       - name: Generate PDF for Hands-on-Labs
         run: |
-          TARGET_DIR="$TEMP_DIR/build/site/hands-on-labs/"
+          TARGET_DIR="$TEMP_DIR/src/landing-page/docs/hands-on-labs/"
           if [ -d "$TARGET_DIR" ]; then
-            echo "Generating PDF for Hands-on-Labs"
+            echo "Generating PDF for Hands-on-Labs from source Markdown files."
             docker run --rm --user $(id -u):$(id -g) \
               -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
               -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
@@ -213,8 +213,8 @@ jobs:
               ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
             mv "$TARGET_DIR/site/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
           else
-            echo "ERROR: hands-on-labs directory not found in $TARGET_DIR!"
-            ls -R $TEMP_DIR/build/site/
+            echo "ERROR: hands-on-labs source directory not found in $TARGET_DIR!"
+            ls -R $TEMP_DIR/src/landing-page/docs/
             exit 1
           fi
 
