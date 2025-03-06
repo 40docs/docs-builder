@@ -199,7 +199,7 @@ jobs:
       - name: Create PDF
         run: |
           cp -a $TEMP_DIR/src/theme "$TEMP_DIR/src/landing-page/hands-on-labs/"
-          echo "INHERIT: docs/theme/mkdocs.yml" >> "$TEMP_DIR/src/landing-page/hands-on-labs/mkdocs.yml"
+          echo "INHERIT: theme/mkdocs.yml" >> "$TEMP_DIR/src/landing-page/hands-on-labs/mkdocs.yml"
           docker run --rm --user $(id -u):$(id -g) \
                             -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
                             -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
