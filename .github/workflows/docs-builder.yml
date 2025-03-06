@@ -203,7 +203,7 @@ jobs:
             echo "Generating PDF for Hands-on-Labs"
           
             cp -a "$TEMP_DIR/src/theme" "$TARGET_DIR/"
-            
+            echo "INHERIT: docs/theme/mkdocs.yml" >> "$TARGET_DIR/mkdocs.yml"            
             docker run --rm --user $(id -u):$(id -g) \
               -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
               -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
