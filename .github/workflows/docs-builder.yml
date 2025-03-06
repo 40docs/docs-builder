@@ -187,7 +187,6 @@ jobs:
           path: ${{ env.TEMP_DIR }}/src/landing-page/docs
           fetch-depth: 0
 
-
       - name: Build HTML
         shell: bash
         run: |
@@ -198,9 +197,8 @@ jobs:
         
       - name: Create PDF
         run: |
-          cp -a $TEMP_DIR/src/theme "$TEMP_DIR/src/landing-page/hands-on-labs/"
-          echo "INHERIT: theme/mkdocs.yml" >> "$TEMP_DIR/src/landing-page/hands-on-labs/mkdocs.yml"
-          ls -al "$TEMP_DIR/src/landing-page/hands-on-labs/theme/"
+          cp -a $TEMP_DIR/src/theme "$TEMP_DIR/src/landing-page/docs/hands-on-labs/"
+          echo "INHERIT: theme/mkdocs.yml" >> "$TEMP_DIR/src/landing-page/docs/hands-on-labs/mkdocs.yml"
           docker run --rm --user $(id -u):$(id -g) \
                             -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
                             -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
@@ -209,7 +207,7 @@ jobs:
                             -e CUSTOM_DIR="theme" \
                             -e MKDOCS_EXPORTER_PDF_ENABLED="true" \
                             -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" \
-                            -v "$TEMP_DIR/src/landing-page/hands-on-labs:/docs" \
+                            -v "$TEMP_DIR/src/landing-page/docs/hands-on-labs:/docs" \
                             ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
           mv "$TEMP_DIR/src/landing-page/hands-on-labs/site/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
   
