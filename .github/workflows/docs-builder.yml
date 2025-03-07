@@ -171,6 +171,8 @@ jobs:
           TEMP_DIR=$(mktemp -d -p "${RUNNER_WORKSPACE}/docs-builder")
           echo "TEMP_DIR=$TEMP_DIR" >> $GITHUB_ENV
           mkdir -p $TEMP_DIR
+          mkdir -p $TEMP_DIR/site/
+          mkdir -p $TEMP_DIR/pdf/
           mkdir -p $TEMP_DIR/build/
           chmod -R 777 $TEMP_DIR
 
@@ -191,14 +193,12 @@ jobs:
         shell: bash
         run: |
           cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/landing-page/theme
-          echo "INHERIT: theme/mkdocs.yml" >> "$TEMP_DIR/src/landing-page/mkdocs.yml"
-          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="Hands on Labs" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -v $TEMP_DIR/src/landing-page/:/tmp/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
+          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="Hands on Labs" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -v $TEMP_DIR/site/:/tmp/site -v $TEMP_DIR/src/landing-page/:/tmp/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
           mv $TEMP_DIR/src/landing-page/site $TEMP_DIR/build/
         
       - name: Create PDF
         run: |
           cp -a $TEMP_DIR/src/theme "$TEMP_DIR/src/landing-page/hands-on-labs/"
-          echo "INHERIT: theme/mkdocs.yml" > "$TEMP_DIR/src/landing-page/hands-on-labs/mkdocs.yml"
           docker run --rm --user $(id -u):$(id -g) \
                             -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
                             -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
@@ -206,9 +206,10 @@ jobs:
                             -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}" \
                             -e MKDOCS_EXPORTER_PDF_ENABLED="true" \
                             -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" \
-                            -v "$TEMP_DIR/src/landing-page/hands-on-labs:/docs" \
+                            -v "$TEMP_DIR/pdf:/tmp/site" \
+                            -v "$TEMP_DIR/src/landing-page/hands-on-labs:/tmp/docs" \
                             ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-          mv "$TEMP_DIR/src/landing-page/hands-on-labs/site/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
+          mv "$TEMP_DIR/pdf/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
   
       - name: Copy Workdir to TEMP_DIR
         run: |
