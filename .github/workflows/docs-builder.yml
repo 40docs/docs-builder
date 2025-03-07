@@ -193,7 +193,7 @@ jobs:
         shell: bash
         run: |
           cp -a $TEMP_DIR/src/theme $TEMP_DIR/src/landing-page/theme
-          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="Hands on Labs" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -v $TEMP_DIR/site/:/tmp/site -v $TEMP_DIR/src/landing-page/:/tmp/docs ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
+          docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="Hands on Labs" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -v $TEMP_DIR/site/:/tmp/site/ -v $TEMP_DIR/src/landing-page/:/tmp/docs/ ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
           mv $TEMP_DIR/src/landing-page/site $TEMP_DIR/build/
         
       - name: Create PDF
