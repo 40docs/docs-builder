@@ -198,20 +198,20 @@ jobs:
           docker run --rm --user $(id -u):$(id -g) -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" -e MKDOCS_SITE_NAME="Hands on Labs" -e MKDOCS_EXPORTER_PDF_ENABLED="false" -v $TEMP_DIR/site/:/tmp/site/ -v $TEMP_DIR/src/landing-page/:/tmp/docs/ ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
           cp -a $TEMP_DIR/site $TEMP_DIR/build/
         
-#      - name: Create PDF
-#        run: |
-#          cp -a $TEMP_DIR/src/theme "$TEMP_DIR/src/landing-page/hands-on-labs/"
-#          docker run --rm --user $(id -u):$(id -g) \
-#                            -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
-#                            -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
-#                            -e MKDOCS_SITE_NAME="hands-on-labs" \
-#                            -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}" \
-#                            -e MKDOCS_EXPORTER_PDF_ENABLED="true" \
-#                            -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" \
-#                            -v "$TEMP_DIR/pdf:/tmp/site" \
-#                            -v "$TEMP_DIR/src/landing-page/hands-on-labs:/tmp/docs" \
-#                            ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
-#          mv "$TEMP_DIR/pdf/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
+      - name: Create PDF
+        run: |
+          cp -a $TEMP_DIR/src/theme "$TEMP_DIR/src/landing-page/hands-on-labs/"
+          docker run --rm --user $(id -u):$(id -g) \
+                            -e MKDOCS_HOMEPAGE="https://docs.${{ vars.DNS_ZONE }}" \
+                            -e MKDOCS_PDF_FILENAME="hands-on-labs.pdf" \
+                            -e MKDOCS_SITE_NAME="hands-on-labs" \
+                            -e MKDOCS_SITE_URL="https://docs.${{ vars.DNS_ZONE }}" \
+                            -e MKDOCS_EXPORTER_PDF_ENABLED="true" \
+                            -e PLAYWRIGHT_BROWSERS_PATH="/ms-playwright" \
+                            -v "$TEMP_DIR/pdf:/tmp/site" \
+                            -v "$TEMP_DIR/src/landing-page/hands-on-labs:/tmp/docs" \
+                            ${{ vars.MKDOCS_REPO_NAME }} build -c -d site/
+          mv "$TEMP_DIR/pdf/hands-on-labs.pdf" "$TEMP_DIR/build/site/hands-on-labs.pdf"
   
       - name: Copy Workdir to TEMP_DIR
         run: |
